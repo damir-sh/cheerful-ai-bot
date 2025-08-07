@@ -13,7 +13,7 @@ A chatbot application that cheers up users and can recall information about prev
 
 - **Framework**: Next.js 15
 - **API**: tRPC for type-safe APIs
-- **Database**: Prisma ORM
+- **Database**: SQLite + Prisma ORM
 - **AI**: OpenRouter API
 - **Styling**: Material-UI (MUI)
 - **Language**: TypeScript
