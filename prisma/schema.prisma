@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// Potential Database Stack:
+// PSQL (primary)
+// Redis (caching)
+// Vector DB Fields
+// Introduce hot tier / cold tier strategy for loading messages 
+// (first grab messages from redis, after that, archive messages to PSQL)
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+
+  // Conversation Messages Relation
+  messages  ConversationMessage[]
+
+  // ConversationNotes Relation
+  notes ConversationNote[]
+
+  // Date Fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConversationNote {
+  id        String   @id @default(cuid())
+
+  content String
+
+  // Conversation Relation
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // Date Fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConversationMessage {
+  id        String   @id @default(cuid())
+
+  content   String
+  originator String
+
+  // Conversation Relation
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // Date Fields
+  createdAt DateTime @default(now())
+
+  // POTENTIAL IMPROVEMENTS
+
+  // These could be added for performance
+  // tokenCount Int?
+  // embedding  Bytes?
+
+  // Critical indexes
+  // @@index([conversationId, createdAt])      // For chronological queries
+  // @@index([conversationId, tokenCount])     // For token-aware pagination
+  // @@index([createdAt])              // For global recent messages
+}
